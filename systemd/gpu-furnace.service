@@ -1,0 +1,26 @@
+[Unit]
+Description=GPU Furnace · system controller (optional)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Create this unprivileged service account and grant only needed GPU access.
+User=gpu-furnace
+Group=gpu-furnace
+WorkingDirectory=/opt/gpu-furnace
+Environment=FURNACE_CONFIG=/etc/gpu-furnace/workloads.json
+Environment=FURNACE_STATE=/var/lib/gpu-furnace
+Environment=FURNACE_TOKEN_FILE=/etc/gpu-furnace/control.token
+EnvironmentFile=-/etc/gpu-furnace/furnace.env
+StateDirectory=gpu-furnace
+ExecStart=/usr/bin/python3 /opt/gpu-furnace/heatd/heatd.py
+Restart=on-failure
+RestartSec=10
+KillSignal=SIGTERM
+KillMode=control-group
+TimeoutStopSec=180
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,1373 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f2ed" />
+    <title>GPU Furnace · The hearth</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: #f5f2ed;
+        --card: #fffdf9;
+        --ink: #282d2b;
+        --muted: #747971;
+        --line: #e4e1d9;
+        --ember: #bd542e;
+        --orange: #f7a66a;
+        --green: #5c785c;
+        --dark: #242e2b;
+        --sans:
+          system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font: 14px/1.5 var(--sans);
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:disabled {
+        cursor: default;
+        opacity: 0.45;
+      }
+      button:focus-visible,
+      a:focus-visible,
+      input:focus-visible,
+      summary:focus-visible {
+        outline: 3px solid #bc7046;
+        outline-offset: 4px;
+      }
+      button {
+        transition:
+          background 0.18s,
+          transform 0.18s;
+      }
+      button:active:not(:disabled) {
+        transform: translateY(1px);
+      }
+      svg {
+        display: block;
+      }
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+      .shell {
+        max-width: 1200px;
+        padding: 0 36px;
+        margin: auto;
+      }
+      .top {
+        height: 94px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        font-weight: 750;
+        font-size: 17px;
+        letter-spacing: -0.6px;
+      }
+      .brandmark {
+        background: var(--ember);
+        color: #fff6ed;
+        width: 37px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px 12px 15px 15px;
+      }
+      .brandmark svg {
+        width: 21px;
+      }
+      .brand small {
+        font-size: 11px;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 500;
+        display: block;
+      }
+      .topright {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .connection {
+        font-size: 12px;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        display: inline-block;
+      }
+      .connection.offline .dot {
+        background: #c5503a;
+      }
+      .quiet {
+        border: 1px solid var(--line);
+        background: transparent;
+        border-radius: 9px;
+        padding: 8px 12px;
+        color: var(--ink);
+        font-size: 12px;
+      }
+      .quiet:hover {
+        background: #eae5dc;
+      }
+      .intro {
+        padding: 35px 0 27px;
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 16px;
+      }
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 1.8px;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--ember);
+        margin-bottom: 9px;
+      }
+      h1 {
+        font:
+          400 clamp(29px, 3.3vw, 42px)/1.15 Georgia,
+          serif;
+        letter-spacing: -1.3px;
+      }
+      .intro p {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .pill {
+        border: 1px solid var(--line);
+        border-radius: 30px;
+        padding: 7px 12px;
+        font-size: 11px;
+        white-space: nowrap;
+      }
+      .pill.demo {
+        background: #fbe9d5;
+        border-color: #e8ccb0;
+        color: #8c4725;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 1.05fr 1fr;
+        gap: 22px;
+      }
+      .thermostat {
+        border-radius: 20px;
+        background: var(--dark);
+        color: #fff9ed;
+        padding: 25px 28px 24px;
+        overflow: hidden;
+        position: relative;
+      }
+      .thermostat:before {
+        content: "";
+        position: absolute;
+        width: 280px;
+        height: 280px;
+        background: radial-gradient(ellipse, #ae6a333b, transparent 68%);
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        pointer-events: none;
+      }
+      .panelhead {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .panelhead h2 {
+        font-size: 12px;
+        font-weight: 500;
+        color: #cecfc3;
+      }
+      .livebadge {
+        font-size: 10px;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: #f7bf8a;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .livebadge .dot {
+        background: #efa36d;
+      }
+      .dial {
+        width: 264px;
+        height: 218px;
+        margin: 12px auto 0;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .dial svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+      .dial path {
+        fill: none;
+        stroke-linecap: round;
+        stroke-width: 5;
+      }
+      .dial .track {
+        stroke: #49514a;
+      }
+      .dial .fill {
+        stroke: var(--orange);
+        stroke-dasharray: 460;
+        stroke-dashoffset: 115;
+        transition: stroke-dashoffset 1s;
+      }
+      .temp {
+        font:
+          400 76px/1 Georgia,
+          serif;
+        letter-spacing: -4px;
+        margin-top: 20px;
+        position: relative;
+      }
+      .temp sup {
+        font: 300 27px var(--sans);
+        letter-spacing: 0;
+        vertical-align: top;
+        display: inline-block;
+        margin-top: 8px;
+      }
+      .roomlabel {
+        color: #b4bcae;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1.4px;
+        margin-top: 10px;
+      }
+      .setpoint {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        position: relative;
+        margin-top: -12px;
+      }
+      .step {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 1px solid #647065;
+        background: transparent;
+        color: #fff9ed;
+        font-size: 22px;
+      }
+      .settext {
+        text-align: center;
+        font-size: 12px;
+        min-width: 115px;
+        color: #d9ddcf;
+      }
+      .settext strong {
+        font-weight: 550;
+        color: #fff9ed;
+      }
+      .statusline {
+        text-align: center;
+        margin: 16px 0 20px;
+        font-size: 12px;
+        color: #e7ba94;
+        min-height: 18px;
+      }
+      .modebar {
+        background: #1a2320;
+        border-radius: 11px;
+        padding: 5px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+      }
+      .modebar button {
+        border: 0;
+        background: transparent;
+        color: #adb8a9;
+        padding: 10px 4px;
+        font-size: 12px;
+        border-radius: 7px;
+      }
+      .modebar button.selected {
+        background: #f4ede0;
+        color: #303b31;
+        box-shadow: 0 2px 4px #0002;
+      }
+      .sensorline {
+        color: #aeb8a9;
+        font-size: 10px;
+        text-align: center;
+        margin-top: 14px;
+      }
+      .rightstack {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .metrics {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .metric {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        padding: 19px 21px;
+      }
+      .metriclabel {
+        font-size: 11px;
+        color: var(--muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .metricvalue {
+        font:
+          400 35px/1.2 Georgia,
+          serif;
+        letter-spacing: -1px;
+        margin: 10px 0 5px;
+      }
+      .metricvalue small {
+        font: 13px var(--sans);
+        letter-spacing: 0;
+        color: var(--muted);
+      }
+      .metricnote {
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .powerbar {
+        height: 4px;
+        margin-top: 11px;
+        border-radius: 6px;
+        background: #ece8e0;
+        overflow: hidden;
+      }
+      .powerbar span {
+        display: block;
+        background: var(--ember);
+        width: 0;
+        height: 100%;
+        transition: width 1s;
+      }
+      .fuel {
+        border: 1px solid var(--line);
+        background: var(--card);
+        border-radius: 15px;
+        padding: 19px 21px;
+        flex: 1;
+      }
+      .sectiontop {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+      .sectiontop h2 {
+        font-size: 13px;
+        font-weight: 650;
+        letter-spacing: -0.2px;
+      }
+      .sectiontop .sub {
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .fueloptions {
+        margin-top: 15px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .fueloption {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: transparent;
+        text-align: left;
+        padding: 12px 9px;
+        color: var(--ink);
+      }
+      .fueloption.selected {
+        border-color: #c9805b;
+        background: #fcf1e7;
+      }
+      .fueloption strong {
+        font-size: 11px;
+        display: block;
+      }
+      .fueloption span {
+        font-size: 9px;
+        color: var(--muted);
+        display: block;
+        margin-top: 4px;
+      }
+      .fuelnote {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 13px;
+      }
+      .lower {
+        display: grid;
+        grid-template-columns: 1.25fr 1fr;
+        gap: 22px;
+        margin-top: 22px;
+      }
+      .history,
+      .workloadpanel {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--card);
+        padding: 22px 24px;
+      }
+      .legend {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .legend i {
+        width: 14px;
+        height: 2px;
+        background: var(--ember);
+      }
+      .chartwrap {
+        height: 181px;
+        position: relative;
+        margin-top: 14px;
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .chartempty {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .historyfoot {
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 10px;
+        margin-top: 7px;
+      }
+      .workloads {
+        display: grid;
+        gap: 8px;
+        margin-top: 15px;
+      }
+      .workload {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #eeeae2;
+      }
+      .workload:last-child {
+        border-bottom: 0;
+      }
+      .workloadname {
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      .workload .dot {
+        background: #cecec3;
+        width: 7px;
+        height: 7px;
+        flex-shrink: 0;
+      }
+      .workload.running .dot {
+        background: var(--ember);
+        box-shadow: 0 0 0 4px #f5e5d7;
+      }
+      .workloadwatts {
+        font-size: 11px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .empty {
+        font-size: 12px;
+        color: var(--muted);
+        padding: 20px 0;
+      }
+      .utility {
+        margin-top: 22px;
+        border-top: 1px solid var(--line);
+        padding: 18px 0;
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        align-items: center;
+      }
+      .utility p {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+      }
+      .advanced {
+        border-top: 1px solid var(--line);
+        padding: 15px 0;
+      }
+      .advanced summary {
+        font-size: 11px;
+        color: var(--muted);
+        cursor: pointer;
+        width: max-content;
+      }
+      .advancedcontent {
+        padding: 16px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .advancedcontent p {
+        max-width: 650px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      footer {
+        display: flex;
+        justify-content: space-between;
+        padding: 18px 0 26px;
+        font-size: 10px;
+        color: #81867c;
+      }
+      footer span:last-child {
+        color: #a0a292;
+      }
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 24px;
+        transform: translateX(-50%);
+        background: var(--dark);
+        color: #fff9ed;
+        border-radius: 12px;
+        padding: 13px 20px;
+        box-shadow: 0 5px 30px #0003;
+        font-size: 12px;
+        z-index: 10;
+        max-width: min(90vw, 500px);
+      }
+      .toast:empty {
+        display: none;
+      }
+      dialog {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--card);
+        color: var(--ink);
+        padding: 28px;
+        width: min(420px, 90vw);
+        box-shadow: 0 20px 100px #0003;
+      }
+      dialog::backdrop {
+        background: #1a272a88;
+        backdrop-filter: blur(4px);
+      }
+      dialog h2 {
+        font:
+          27px Georgia,
+          serif;
+        margin-bottom: 10px;
+      }
+      dialog p {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 19px;
+      }
+      dialog label {
+        font-size: 11px;
+        display: block;
+      }
+      dialog input {
+        width: 100%;
+        padding: 11px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        margin: 6px 0 20px;
+      }
+      .dialogactions {
+        display: flex;
+        justify-content: end;
+        gap: 8px;
+      }
+      .primary {
+        border: 0;
+        background: var(--ember);
+        color: white;
+        border-radius: 9px;
+        padding: 9px 15px;
+        font-size: 12px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      @media (max-width: 850px) {
+        .shell {
+          padding: 0 22px;
+        }
+        .layout {
+          grid-template-columns: 1fr 1fr;
+        }
+        .thermostat {
+          padding: 22px 20px;
+        }
+        .metrics {
+          gap: 10px;
+        }
+        .metric {
+          padding: 16px 13px;
+        }
+        .fuel {
+          padding: 17px 13px;
+        }
+        .fueloptions {
+          gap: 5px;
+        }
+        .fueloption {
+          padding: 12px 7px;
+        }
+        .lower {
+          grid-template-columns: 1fr 1fr;
+        }
+        .history,
+        .workloadpanel {
+          padding: 20px 17px;
+        }
+      }
+      @media (max-width: 640px) {
+        .shell {
+          padding: 0 18px;
+        }
+        .top {
+          height: 78px;
+        }
+        .topright {
+          gap: 10px;
+        }
+        .connection {
+          font-size: 10px;
+        }
+        .brand {
+          font-size: 15px;
+        }
+        .brand small {
+          font-size: 9px;
+        }
+        .intro {
+          padding: 27px 0 23px;
+          align-items: start;
+          flex-direction: column;
+          gap: 13px;
+        }
+        .intro h1 {
+          font-size: 34px;
+        }
+        .intro p {
+          font-size: 12px;
+          max-width: 270px;
+        }
+        .layout,
+        .lower {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .thermostat {
+          padding: 22px 23px;
+        }
+        .dial {
+          height: 218px;
+        }
+        .rightstack {
+          gap: 16px;
+        }
+        .metrics {
+          gap: 12px;
+        }
+        .metric {
+          padding: 18px;
+        }
+        .fuel {
+          padding: 20px;
+        }
+        .fueloption {
+          padding: 13px 12px;
+        }
+        .fueloption strong {
+          font-size: 12px;
+        }
+        .fueloption span {
+          font-size: 10px;
+        }
+        .lower {
+          margin-top: 16px;
+        }
+        .utility {
+          align-items: start;
+          flex-direction: column;
+        }
+        .actions {
+          width: 100%;
+        }
+        .actions button {
+          flex: 1;
+        }
+        .top .quiet {
+          padding: 7px 9px;
+          font-size: 11px;
+        }
+        .connection span:last-child {
+          max-width: 65px;
+        }
+        .history,
+        .workloadpanel {
+          padding: 20px;
+        }
+        .chartwrap {
+          height: 175px;
+        }
+        .metricvalue {
+          font-size: 34px;
+        }
+        footer {
+          gap: 12px;
+          font-size: 9px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+          animation: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="top">
+        <div class="brand">
+          <span class="brandmark" aria-hidden="true"
+            ><svg viewBox="0 0 24 30" fill="none">
+              <path
+                d="M13 1c2 8-7 10-4 16 1-4 4-4 5-7 10 9 8 19-2 19C1 29-3 18 5 10c-1 7 2 7 2 7C3 10 12 7 13 1Z"
+                fill="currentColor"
+              /></svg
+          ></span>
+          <div>gpu furnace<small>A little useful warmth</small></div>
+        </div>
+        <div class="topright">
+          <div class="connection" id="connection">
+            <span class="dot"></span><span id="connectionText">Connecting</span>
+          </div>
+          <button class="quiet" id="tokenBtn">Connect controls</button>
+        </div>
+      </header>
+      <main>
+        <section class="intro">
+          <div>
+            <div class="eyebrow">The hearth / local control</div>
+            <h1>Your compute.<br />A warmer room.</h1>
+            <p>Put your GPUs to work. Let the room set the pace.</p>
+          </div>
+          <span class="pill" id="rigBadge">GPU heat, thoughtfully managed</span>
+        </section>
+        <div class="layout">
+          <section class="thermostat" aria-label="Thermostat controls">
+            <div class="panelhead">
+              <h2>Room temperature</h2>
+              <button
+                class="quiet"
+                id="unitToggle"
+                style="color: #e7e6d7; border-color: #586155"
+                aria-label="Switch to Celsius"
+              >
+                °F / °C
+              </button>
+            </div>
+            <div class="dial">
+              <svg viewBox="0 0 264 218" aria-hidden="true">
+                <path class="track" d="M40 182 A108 108 0 1 1 224 182" />
+                <path
+                  class="fill"
+                  id="dialFill"
+                  d="M40 182 A108 108 0 1 1 224 182"
+                />
+              </svg>
+              <div class="temp">
+                <span id="roomTemp">—</span><sup id="tempUnit">°F</sup>
+              </div>
+              <div class="roomlabel" id="roomLabel">Waiting for a sensor</div>
+            </div>
+            <div class="setpoint">
+              <button
+                class="step control"
+                id="downBtn"
+                aria-label="Lower target temperature"
+              >
+                −
+              </button>
+              <div class="settext">Target <strong id="setpoint">—</strong></div>
+              <button
+                class="step control"
+                id="upBtn"
+                aria-label="Raise target temperature"
+              >
+                +
+              </button>
+            </div>
+            <p class="statusline" id="modeText" aria-live="polite">
+              Finding your furnace…
+            </p>
+            <div class="modebar" role="group" aria-label="Heating mode">
+              <button class="control" data-control="auto">Automatic</button
+              ><button class="control" data-control="full">Full heat</button
+              ><button class="control" data-control="off">Off</button>
+            </div>
+            <p class="sensorline" id="sensorLine">
+              The thermostat uses a fresh room reading.
+            </p>
+          </section>
+          <div class="rightstack">
+            <section class="metrics" aria-label="GPU readings">
+              <div class="metric">
+                <div class="metriclabel">
+                  GPU power <span aria-hidden="true">↗</span>
+                </div>
+                <div class="metricvalue">
+                  <span id="watts">—</span> <small>W</small>
+                </div>
+                <div class="metricnote" id="powerNote">
+                  Board power · waiting for telemetry
+                </div>
+                <div class="powerbar"><span id="powerFill"></span></div>
+              </div>
+              <div class="metric">
+                <div class="metriclabel">
+                  Heat delivered <span aria-hidden="true">≈</span>
+                </div>
+                <div class="metricvalue">
+                  <span id="energy">—</span> <small>kWh</small>
+                </div>
+                <div class="metricnote">Estimated GPU heat · last 24 hours</div>
+                <div class="metricnote" id="tempNote" style="margin-top: 10px">
+                  Hottest GPU: —
+                </div>
+              </div>
+            </section>
+            <section class="fuel">
+              <div class="sectiontop">
+                <h2>Choose your fuel</h2>
+                <span class="sub">Work behind the warmth</span>
+              </div>
+              <div class="fueloptions">
+                <button class="fueloption control" data-fuel="fold">
+                  <strong>Fold</strong><span>Volunteer research</span></button
+                ><button class="fueloption control" data-fuel="bench">
+                  <strong>Bench</strong><span>Matrix workloads</span></button
+                ><button class="fueloption control" data-fuel="forge">
+                  <strong>Forge</strong><span>Generate a dataset</span>
+                </button>
+              </div>
+              <p class="fuelnote" id="fuelNote">
+                Fuel becomes available when its workloads are configured.
+              </p>
+            </section>
+          </div>
+        </div>
+        <div class="lower">
+          <section class="history">
+            <div class="sectiontop">
+              <h2>A day at the hearth</h2>
+              <span class="legend"><i></i> Room temperature</span>
+            </div>
+            <div class="chartwrap">
+              <canvas
+                id="chart"
+                role="img"
+                aria-label="Room temperature over the last 24 hours"
+              ></canvas>
+              <div class="chartempty" id="chartEmpty">
+                History will appear as readings arrive.
+              </div>
+            </div>
+            <div class="historyfoot">
+              <span>24 hours ago</span><span id="chartRange"></span
+              ><span>Now</span>
+            </div>
+          </section>
+          <section class="workloadpanel">
+            <div class="sectiontop">
+              <h2>The work in progress</h2>
+              <span class="sub" id="workloadCount">0 active</span>
+            </div>
+            <div class="workloads" id="workloads">
+              <p class="empty">Loading workloads…</p>
+            </div>
+          </section>
+        </div>
+        <div class="utility">
+          <p id="reservationNote">Need your GPUs back? Heating can wait.</p>
+          <div class="actions">
+            <button class="quiet control" id="loanBtn">
+              Reserve GPUs · 2 hours</button
+            ><button class="quiet control" id="releaseBtn" hidden>
+              Release GPUs
+            </button>
+          </div>
+        </div>
+        <details class="advanced">
+          <summary>Sensor calibration &amp; details</summary>
+          <div class="advancedcontent">
+            <p id="calLine">
+              External room sensors are recommended. Case and GPU sensors need
+              calibration against a real room thermometer.
+            </p>
+            <button class="quiet control" id="calBtn">
+              Estimate offset from GPUs
+            </button>
+          </div>
+        </details>
+      </main>
+      <footer>
+        <span>GPU Furnace · Compute something. Warm somewhere.</span
+        ><span>Local first. Yours to control.</span>
+      </footer>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <dialog id="tokenDialog" aria-labelledby="dialogTitle">
+      <form id="tokenForm">
+        <h2 id="dialogTitle">Make yourself at home.</h2>
+        <p>
+          Enter your controller’s access token to adjust the furnace. It stays
+          in this browser tab’s session.
+        </p>
+        <label for="tokenInput">Control token</label
+        ><input
+          type="password"
+          id="tokenInput"
+          autocomplete="off"
+          placeholder="Paste your private token"
+          required
+        />
+        <div class="dialogactions">
+          <button type="button" class="quiet" id="disconnectBtn">
+            Forget token</button
+          ><button type="button" class="quiet" id="cancelToken">Cancel</button
+          ><button class="primary" type="submit">Connect</button>
+        </div>
+      </form>
+    </dialog>
+    <script>
+      "use strict";
+      const $ = (id) => document.getElementById(id);
+      let unit = localStorage.getItem("furnace_unit") || "F";
+      let token = sessionStorage.getItem("furnace_token") || "";
+      // Remove credentials saved persistently by older dashboard versions.
+      localStorage.removeItem("furnace_token");
+      let state = null,
+        readings = [],
+        historyAt = 0,
+        refreshing = false,
+        pendingAction = null,
+        toastTimer;
+      const finite = (n) => typeof n === "number" && Number.isFinite(n);
+      const toUnit = (f) => (unit === "C" ? ((f - 32) * 5) / 9 : f);
+      const temp = (f) => (finite(f) ? toUnit(f).toFixed(1) + "°" + unit : "—");
+      const MODES = {
+        stoking: "Warming the room",
+        idle: "Room is warm · resting",
+        hold: "Holding steady",
+        full: "Full heat · room target overridden",
+        "manual-off": "Heating is off",
+        "thermal-hold": "Thermal guard · letting the GPUs cool",
+        reserved: "Reserved · heating is paused",
+        blind: "Waiting for a fresh room reading",
+        "telemetry-missing": "Heating paused · GPU telemetry unavailable",
+        off: "Ready when you are",
+      };
+      function toast(message) {
+        $("toast").textContent = message;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => ($("toast").textContent = ""), 6000);
+      }
+      function openToken() {
+        if (!$("tokenDialog").open) $("tokenDialog").showModal();
+      }
+      async function post(path, body = {}) {
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers.Authorization = "Bearer " + token;
+        const response = await fetch(path, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(45000),
+        });
+        const data = await response.json();
+        if (response.status === 401) {
+          pendingAction = [path, body];
+          openToken();
+          throw new Error("A valid control token is needed.");
+        }
+        if (!response.ok)
+          throw new Error(
+            data.error || "The controller could not complete that action.",
+          );
+        return data;
+      }
+      async function act(path, body) {
+        try {
+          await post(path, body);
+          historyAt = 0;
+          await refresh();
+        } catch (error) {
+          toast(error.message);
+        }
+      }
+      function render(s) {
+        state = s;
+        const fresh = s.sensor_fresh;
+        $("roomTemp").textContent =
+          fresh && finite(s.sensor.temp_f)
+            ? toUnit(s.sensor.temp_f).toFixed(1)
+            : "—";
+        $("tempUnit").textContent = "°" + unit;
+        $("roomLabel").textContent = fresh
+          ? "Room temperature"
+          : "Waiting for a fresh sensor";
+        $("setpoint").textContent = temp(s.setpoint_f);
+        $("modeText").textContent = MODES[s.mode] || s.mode;
+        $("sensorLine").textContent = s.sensor.src
+          ? s.sensor.src + (fresh ? " · fresh reading" : " · reading expired")
+          : "Connect a room sensor to use automatic heating.";
+        $("dialFill").style.strokeDashoffset = fresh
+          ? String(
+              460 *
+                (1 - Math.max(0.08, Math.min(1, (s.sensor.temp_f - 45) / 50))),
+            )
+          : "460";
+        $("watts").textContent = finite(s.watts) ? Math.round(s.watts) : "—";
+        $("powerNote").textContent =
+          Math.round(s.max_watts) +
+          " W planned budget · " +
+          Math.round(s.planned_watts) +
+          " W active";
+        $("powerFill").style.width = finite(s.watts)
+          ? Math.min(100, (s.watts / s.max_watts) * 100) + "%"
+          : "0";
+        $("tempNote").textContent =
+          "Hottest GPU: " +
+          (finite(s.gpu_temp_c)
+            ? s.gpu_temp_c.toFixed(0) + "°C"
+            : "unavailable");
+        const active = s.workloads.filter((w) => w.running).length;
+        $("workloadCount").textContent =
+          active + " / " + s.workloads.length + " active";
+        const nodes = s.workloads.map((w) => {
+          const row = document.createElement("div");
+          row.className = "workload" + (w.running ? " running" : "");
+          const name = document.createElement("div");
+          name.className = "workloadname";
+          const dot = document.createElement("span");
+          dot.className = "dot";
+          dot.setAttribute("aria-hidden", "true");
+          const label = document.createElement("span");
+          label.textContent = w.name;
+          name.append(dot, label);
+          const watts = document.createElement("span");
+          watts.className = "workloadwatts";
+          watts.textContent =
+            (w.running ? "Running" : "Resting") + " · " + w.watts + " W";
+          row.append(name, watts);
+          return row;
+        });
+        if (!nodes.length) {
+          const el = document.createElement("p");
+          el.className = "empty";
+          el.textContent =
+            "No enabled workloads yet. Add yours in the local configuration.";
+          nodes.push(el);
+        }
+        $("workloads").replaceChildren(...nodes);
+        document.querySelectorAll("[data-control]").forEach((b) => {
+          const selected = b.dataset.control === (s.manual_mode || "auto");
+          b.classList.toggle("selected", selected);
+          b.setAttribute("aria-pressed", String(selected));
+        });
+        document.querySelectorAll("[data-fuel]").forEach((b) => {
+          const selected = b.dataset.fuel === s.heat_mode;
+          b.classList.toggle("selected", selected);
+          b.disabled = !s.heat_modes.includes(b.dataset.fuel);
+          b.setAttribute("aria-pressed", String(selected));
+        });
+        $("fuelNote").textContent = s.heat_modes.length
+          ? "Only your enabled workloads can run. Switch fuel whenever you like."
+          : "Enable a workload in your local configuration to get started.";
+        $("loanBtn").hidden = s.reserved;
+        $("releaseBtn").hidden = !s.reserved;
+        $("reservationNote").textContent = s.reserved
+          ? "GPUs reserved" + (s.reserve_reason ? " · " + s.reserve_reason : "")
+          : "Need your GPUs back? Heating can wait.";
+        $("rigBadge").textContent = s.demo
+          ? "Demo · 4 × 150 W = 600 W"
+          : Math.round(s.max_watts) + " W GPU heat budget";
+        $("rigBadge").classList.toggle("demo", s.demo);
+        $("tokenBtn").textContent = s.demo
+          ? "Demo controls"
+          : token
+            ? "Control token"
+            : "Connect controls";
+        $("calLine").textContent = s.calibrated
+          ? "Case sensor offset: " +
+            (unit === "C" ? (s.offset_f * 5) / 9 : s.offset_f).toFixed(1) +
+            "°" +
+            unit +
+            ". GPU estimates are approximate; compare with a room thermometer."
+          : "External room sensors are recommended. Case and GPU sensors need calibration against a real room thermometer.";
+      }
+      function drawChart() {
+        const c = $("chart"),
+          box = c.getBoundingClientRect(),
+          scale = window.devicePixelRatio || 1;
+        c.width = Math.max(1, Math.round(box.width * scale));
+        c.height = Math.max(1, Math.round(box.height * scale));
+        const ctx = c.getContext("2d");
+        ctx.scale(scale, scale);
+        const W = box.width,
+          H = box.height,
+          now = Date.now() / 1000,
+          start = now - 86400;
+        const valid = readings.filter((p) => finite(p.room_f) && p.ts >= start);
+        $("chartEmpty").hidden = valid.length >= 2;
+        if (valid.length < 2) return;
+        const lo = Math.min(...valid.map((p) => p.room_f)) - 0.8,
+          hi = Math.max(...valid.map((p) => p.room_f)) + 0.8;
+        const x = (t) => ((t - start) / 86400) * W,
+          y = (f) => 12 + ((hi - f) / (hi - lo)) * (H - 27);
+        ctx.strokeStyle = "#eae6dd";
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 4; i++) {
+          const yy = 12 + (i * (H - 27)) / 3;
+          ctx.beginPath();
+          ctx.moveTo(0, yy);
+          ctx.lineTo(W, yy);
+          ctx.stroke();
+        }
+        ctx.beginPath();
+        let previous = null;
+        for (const p of valid) {
+          if (previous && p.ts - previous.ts <= 600)
+            ctx.lineTo(x(p.ts), y(p.room_f));
+          else ctx.moveTo(x(p.ts), y(p.room_f));
+          previous = p;
+        }
+        ctx.strokeStyle = "#bd542e";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        const last = valid[valid.length - 1];
+        ctx.fillStyle = "#bd542e";
+        ctx.beginPath();
+        ctx.arc(x(last.ts), y(last.room_f), 3, 0, Math.PI * 2);
+        ctx.fill();
+        $("chartRange").textContent = temp(lo + 0.8) + " – " + temp(hi - 0.8);
+        c.setAttribute(
+          "aria-label",
+          "Last 24 hours of room temperature, from " +
+            temp(lo + 0.8) +
+            " to " +
+            temp(hi - 0.8),
+        );
+      }
+      function renderEnergy() {
+        let energy = 0,
+          intervals = 0;
+        for (let i = 1; i < readings.length; i++) {
+          const a = readings[i - 1],
+            b = readings[i],
+            dt = b.ts - a.ts;
+          if (finite(a.watts) && finite(b.watts) && dt > 0 && dt <= 600) {
+            energy += (((a.watts + b.watts) / 2) * dt) / 3600000;
+            intervals++;
+          }
+        }
+        $("energy").textContent = intervals ? energy.toFixed(2) : "—";
+      }
+      async function refresh() {
+        if (refreshing) return;
+        refreshing = true;
+        try {
+          const response = await fetch("status", {
+            cache: "no-store",
+            signal: AbortSignal.timeout(15000),
+          });
+          if (!response.ok) throw new Error("Controller unavailable");
+          const s = await response.json();
+          document
+            .querySelectorAll(".control")
+            .forEach((b) => (b.disabled = false));
+          render(s);
+          $("connectionText").textContent = s.demo
+            ? "Demo connected"
+            : "Connected";
+          $("connection").classList.remove("offline");
+          if (Date.now() - historyAt > 60000) {
+            try {
+              const r = await fetch("history?hours=24", {
+                signal: AbortSignal.timeout(15000),
+              });
+              if (!r.ok) throw new Error();
+              readings = (await r.json()).readings;
+              historyAt = Date.now();
+              renderEnergy();
+            } catch (e) {
+              $("energy").textContent = "—";
+            }
+          }
+          drawChart();
+        } catch (error) {
+          $("connectionText").textContent = "Disconnected";
+          $("connection").classList.add("offline");
+          $("modeText").textContent = "Controller disconnected · reconnecting…";
+          $("roomTemp").textContent = "—";
+          $("watts").textContent = "—";
+          document
+            .querySelectorAll(".control")
+            .forEach((b) => (b.disabled = true));
+        } finally {
+          refreshing = false;
+        }
+      }
+      $("unitToggle").onclick = () => {
+        unit = unit === "F" ? "C" : "F";
+        localStorage.setItem("furnace_unit", unit);
+        $("unitToggle").setAttribute(
+          "aria-label",
+          "Switch to " + (unit === "F" ? "Celsius" : "Fahrenheit"),
+        );
+        if (state) render(state);
+        drawChart();
+      };
+      $("upBtn").onclick = () =>
+        act("setpoint", { delta_f: unit === "C" ? 1.8 : 1 });
+      $("downBtn").onclick = () =>
+        act("setpoint", { delta_f: unit === "C" ? -1.8 : -1 });
+      document
+        .querySelectorAll("[data-control]")
+        .forEach(
+          (b) => (b.onclick = () => act("mode", { mode: b.dataset.control })),
+        );
+      document
+        .querySelectorAll("[data-fuel]")
+        .forEach(
+          (b) => (b.onclick = () => act("heatmode", { mode: b.dataset.fuel })),
+        );
+      $("loanBtn").onclick = () =>
+        act("reserve", { seconds: 7200, reason: "Dashboard reservation" });
+      $("releaseBtn").onclick = () => act("release");
+      $("calBtn").onclick = async () => {
+        try {
+          const r = await post("calibrate");
+          toast(
+            "Estimated offset: " +
+              r.info.offset_f +
+              "°F. Compare with a room thermometer.",
+          );
+          await refresh();
+        } catch (error) {
+          toast(error.message);
+        }
+      };
+      $("tokenBtn").onclick = () =>
+        state?.demo
+          ? toast("Demo controls are active. No real workloads will run.")
+          : openToken();
+      $("cancelToken").onclick = () => {
+        $("tokenDialog").close();
+        pendingAction = null;
+      };
+      $("disconnectBtn").onclick = () => {
+        token = "";
+        sessionStorage.removeItem("furnace_token");
+        $("tokenInput").value = "";
+        $("tokenDialog").close();
+        pendingAction = null;
+        toast("Control token forgotten.");
+        if (state) render(state);
+      };
+      $("tokenForm").onsubmit = async (event) => {
+        event.preventDefault();
+        token = $("tokenInput").value.trim();
+        sessionStorage.setItem("furnace_token", token);
+        $("tokenInput").value = "";
+        $("tokenDialog").close();
+        const action = pendingAction;
+        pendingAction = null;
+        if (action) await act(...action);
+        else await refresh();
+      };
+      $("tokenDialog").addEventListener("cancel", () => (pendingAction = null));
+      window.addEventListener("resize", drawChart);
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) refresh();
+      });
+      $("unitToggle").setAttribute(
+        "aria-label",
+        "Switch to " + (unit === "F" ? "Celsius" : "Fahrenheit"),
+      );
+      refresh();
+      setInterval(() => {
+        if (!document.hidden) refresh();
+      }, 5000);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+[Unit]
+Description=Folding@home client (furnace user instance)
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/fah-client --config=%h/.fah/config.xml --log=%h/.fah/log.txt
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=default.target

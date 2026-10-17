@@ -1,0 +1,56 @@
+# Optional room sensor. Create your own ignored secrets.yaml before flashing.
+esphome:
+  name: furnace-thermostat
+  friendly_name: Furnace Thermostat
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+logger:
+  level: WARN
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+http_request:
+  useragent: esphome/furnace
+  timeout: 10s
+
+sensor:
+  - platform: dht
+    model: DHT22
+    pin: GPIO4
+    update_interval: 30s
+    temperature:
+      id: room_temp_f
+      name: Room Temperature
+      unit_of_measurement: "°F"
+      accuracy_decimals: 1
+      filters:
+        - lambda: return x * 1.8f + 32.0f;
+        - sliding_window_moving_average:
+            window_size: 4
+            send_every: 1
+      on_value:
+        then:
+          - if:
+              condition:
+                lambda: return std::isfinite(x);
+              then:
+                - http_request.post:
+                    url: !secret furnace_temperature_url
+                    request_headers:
+                      Content-Type: application/json
+                      Authorization: !secret furnace_authorization
+                    json: |-
+                      root["temp_f"] = x;
+                      root["src"] = "esp32-room";
+    humidity:
+      name: Room Humidity

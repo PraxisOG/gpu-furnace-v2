@@ -1,0 +1,13 @@
+[Unit]
+Description=GPU Furnace · optional TCP bridge
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/gpu-furnace
+EnvironmentFile=%h/.config/gpu-furnace/bridge.env
+ExecStart=/usr/bin/python3 %h/gpu-furnace/desktop/furnace-bridge.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

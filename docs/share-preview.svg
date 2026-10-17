@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+<defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#faf4e8" stroke-opacity=".04"/></pattern></defs>
+<rect width="1280" height="640" fill="#232e29"/><rect width="1280" height="640" fill="url(#grid)"/>
+<rect x="72" y="66" width="48" height="54" rx="15" fill="#bd542e"/><path d="M13 1c2 8-7 10-4 16 1-4 4-4 5-7 10 9 8 19-2 19C1 29-3 18 5 10c-1 7 2 7 2 7C3 10 12 7 13 1Z" transform="translate(83 76) scale(1.1)" fill="#fff6ed"/>
+<text x="138" y="103" fill="#f5efe2" font-family="DejaVu Sans,sans-serif" font-size="30" font-weight="bold">GPU FURNACE</text>
+<text x="74" y="228" fill="#f5efe2" font-family="DejaVu Serif,serif" font-size="66">Your compute.</text><text x="74" y="310" fill="#f5efe2" font-family="DejaVu Serif,serif" font-size="66">A warmer room.</text>
+<text x="77" y="370" fill="#b8c0b1" font-family="DejaVu Sans,sans-serif" font-size="21">Thermostat-controlled workloads for your GPUs.</text>
+<rect x="76" y="417" width="136" height="34" rx="17" fill="#39493e"/><text x="144" y="439" text-anchor="middle" fill="#dce5d1" font-family="DejaVu Sans,sans-serif" font-size="13">SELF-HOSTED</text>
+<rect x="224" y="417" width="170" height="34" rx="17" fill="#39493e"/><text x="309" y="439" text-anchor="middle" fill="#dce5d1" font-family="DejaVu Sans,sans-serif" font-size="13">AMD + NVIDIA</text>
+<rect x="406" y="417" width="148" height="34" rx="17" fill="#39493e"/><text x="480" y="439" text-anchor="middle" fill="#dce5d1" font-family="DejaVu Sans,sans-serif" font-size="13">LOCAL FIRST</text>
+<g fill="#2f3c33" stroke="#52604e"><rect x="846" y="156" width="151" height="110" rx="15"/><rect x="1013" y="156" width="151" height="110" rx="15"/><rect x="846" y="282" width="151" height="110" rx="15"/><rect x="1013" y="282" width="151" height="110" rx="15"/></g>
+<g fill="#f7a66a" font-family="DejaVu Sans,sans-serif" font-size="30" font-weight="bold" text-anchor="middle"><text x="921" y="221">150 W</text><text x="1088" y="221">150 W</text><text x="921" y="347">150 W</text><text x="1088" y="347">150 W</text></g>
+<text x="1004" y="471" text-anchor="middle" fill="#f7a66a" font-family="DejaVu Serif,serif" font-size="56">600 W</text><text x="1004" y="504" text-anchor="middle" fill="#b8c0b1" font-family="DejaVu Sans,sans-serif" font-size="15">EXAMPLE TOTAL GPU POWER</text>
+<path d="M76 552H1204" stroke="#52604e"/><text x="76" y="593" fill="#aebba8" font-family="DejaVu Sans,sans-serif" font-size="16">Compute something. Warm somewhere.</text><text x="1204" y="593" text-anchor="end" fill="#aebba8" font-family="DejaVu Sans,sans-serif" font-size="14">GPU FURNACE · v2</text>
+</svg>

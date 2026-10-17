@@ -145,4 +145,3 @@ python3 scripts/check-secrets.py --history
 ```
 
 CI runs the controller/API tests, configuration validation, shell syntax checks, and credential scans. The secret checker reports locations without printing credential values. It is a heuristic, not a guarantee; revoke any credential that was ever exposed, even after deleting it from Git.
-

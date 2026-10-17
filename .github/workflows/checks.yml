@@ -1,0 +1,21 @@
+name: Checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate example configuration
+        run: python3 heatd/heatd.py --check
+      - name: Test controller and HTTP API
+        run: python3 -m unittest discover -s tests -v
+      - name: Check tracked files and history for common secrets
+        run: |
+          python3 scripts/check-secrets.py
+          python3 scripts/check-secrets.py --history
+      - name: Check shell syntax
+        run: bash -n scripts/setup.sh scripts/bench-fuel.sh scripts/transcode-farm.sh

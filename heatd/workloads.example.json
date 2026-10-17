@@ -1,0 +1,46 @@
+{
+  "settings": {
+    "setpoint_f": 70,
+    "deadband_f": 1.5,
+    "poll_interval_s": 20,
+    "max_watts": 600,
+    "heat_mode": "bench",
+    "sensor_mode": "external",
+    "offset_f": 0,
+    "systin_calibrated": false,
+    "idle_watts_max": 120,
+    "auto_calibrate": false,
+    "max_gpu_temp_c": 85,
+    "reheat_temp_c": 75
+  },
+  "workloads": [
+    {
+      "name": "GPU 1 · 150 W",
+      "fuel": "bench",
+      "cmd": "CUDA_VISIBLE_DEVICES=0 python3 scripts/heater.py",
+      "watts": 150,
+      "enabled": false
+    },
+    {
+      "name": "GPU 2 · 150 W",
+      "fuel": "bench",
+      "cmd": "CUDA_VISIBLE_DEVICES=1 python3 scripts/heater.py",
+      "watts": 150,
+      "enabled": false
+    },
+    {
+      "name": "GPU 3 · 150 W",
+      "fuel": "bench",
+      "cmd": "CUDA_VISIBLE_DEVICES=2 python3 scripts/heater.py",
+      "watts": 150,
+      "enabled": false
+    },
+    {
+      "name": "GPU 4 · 150 W",
+      "fuel": "bench",
+      "cmd": "CUDA_VISIBLE_DEVICES=3 python3 scripts/heater.py",
+      "watts": 150,
+      "enabled": false
+    }
+  ]
+}

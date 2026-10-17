@@ -1,0 +1,20 @@
+[Unit]
+Description=GPU Furnace · thermostat controller
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Clone to ~/gpu-furnace, or adjust these two paths for your checkout.
+WorkingDirectory=%h/gpu-furnace
+EnvironmentFile=-%h/.config/gpu-furnace/furnace.env
+ExecStart=/usr/bin/python3 %h/gpu-furnace/heatd/heatd.py
+Restart=on-failure
+RestartSec=10
+KillSignal=SIGTERM
+KillMode=control-group
+TimeoutStopSec=180
+UMask=0077
+
+[Install]
+WantedBy=default.target
